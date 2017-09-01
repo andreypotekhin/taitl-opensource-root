@@ -43,8 +43,8 @@
          dependent' -->
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-      <maven.compiler.source>1.7</maven.compiler.source>
-      <maven.compiler.target>1.7</maven.compiler.target>
+      <maven.compiler.source>1.8</maven.compiler.source>
+      <maven.compiler.target>1.8</maven.compiler.target>
       <!-- Define main class in your project's pom. Example: com.taitl.[module].[ClassName] -->
       <mainClass>Define your app main class as mainClass property in
          your project pom</mainClass>
