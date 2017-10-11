@@ -1,24 +1,23 @@
 <!--
-   Taitl Opensource Root is parent pom.xml for all Taitl and MesArt maven projects. It defines
+   Taitl Open Source Root is parent pom.xml for all Taitl and MesArt Maven projects. It defines
    build properties, dependencies and plugin configruations that are common to all 
-   our projects.
+   our open source projects.
    
-   Taitl Opensource Root is an immediate parent for: taitl-opensource-parent and taitl-opensource- projects.
+   Taitl Open Source Root is an immediate parent taitl-opensource-parent.
    All other Taitl open source projects are children of taitl-opensource-parent. 
    
    This project defines, among other things:
-      ${taitl-release-version} property, shared among all Taitl open source projects
-      Some basic dependencies (Hamcrest, Apache Commons, JUnit, Mockito, Powermock)
-      Resource filtering - a property referred by a resource file (${my-property}) will 
-         be substituted with its value from your POM file, if it is defined.
-      Excludes /integration tests from regular build, includes into 'intergation-test' 
-         and 'verify' goals (failsafe plugin)
-      Enforces test coverage levels (Jacoco plugin)
-      Enforces coding standards (Checkstyle plugin)
-      Packages your project as a JAR file with all dependencies included
-      Defines the class that you define as <mainClass> property of your project's POM file
-         as the application's main class in your artifact's manifest
-      Plugins: Findbugs, PMD, JXR and JavaDoc.          
+   
+      ${taitl-release-version} property, shared among all Taitl open source projects.
+      Some basic dependencies (Hamcrest, Apache Commons, JUnit, Mockito, Powermock).
+      Resource filtering - any property referred by its ${name} (like ${my-property}) 
+         in a resource file will be substituted with the value from a POM file.
+      Enforces coding standards (Checkstyle plugin).
+      Enforces test coverage levels (Jacoco plugin).
+      Excludes /integration tests from regular builds, includes them into 'intergation-test' 
+         and 'verify' goals (failsafe plugin).
+      Packages your project as a JAR file with dependencies included.
+      Defines the application main class with <mainClass> property.
 	  
 	  Copyright (c) Taitl Design, LLC.
 -->
@@ -32,12 +31,12 @@
    <packaging>pom</packaging>
    <description>Root pom.xml for all taitl projects</description>
    <properties>
-      <!-- Current release version for Taitl open source projects. This value is to be updated
-         whenever we go to a next release. Sharing this value through a single property
-         ensures that all artifacts are released with same version number. When changing
-         this number, do not forget to create source repo branches named accordingly for all
-         dependent artifacts. This will allow coming back later and adding a hot fix
-         to any subproject. -->
+      <!-- Current release version for Taitl open source projects. This value 
+         is to be updated whenever we go to the next release. Sharing this value through 
+         a single property helps ensure that all artifacts are released with same version 
+         number. When changing this number, do not forget to create source repo branches 
+         named accordingly for all dependent projects. This will allow coming back 
+         later and adding a hot fix to any dependent project. -->
       <taitl-release-version>1.0.0-SNAPSHOT</taitl-release-version>
       <!-- Overcome the warning 'Using platform encoding - build is platform 
          dependent' -->
@@ -45,12 +44,12 @@
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
-      <!-- Define main class in your project's pom. Example: com.taitl.[module].[ClassName] -->
+      <!-- Define your app main class in your project's pom.
+         This class will thus be declared main to your jar file's manifest. 
+         Example: com.taitl.[module].[ClassName] -->
       <mainClass>Define your app main class as mainClass property in
          your project pom</mainClass>
-      <!-- Manage skipping integration tests -->
-      <skip-integration-tests>false</skip-integration-tests>
-      <!-- Plugin versions - update from one place -->
+      <!-- Define plugin versions, so that they could be updated from one place - here -->
       <maven-compiler-plugin-version>3.3</maven-compiler-plugin-version>
       <maven-surefire-plugin-version>2.18.1</maven-surefire-plugin-version>
       <maven-failsafe-plugin-version>2.18.1</maven-failsafe-plugin-version>
@@ -60,35 +59,76 @@
       <maven-javadoc-plugin-version>2.10.1</maven-javadoc-plugin-version>
       <findbugs-maven-plugin-version>3.0.0</findbugs-maven-plugin-version>
       <jacoco-maven-plugin-version>0.7.5.201505241946</jacoco-maven-plugin-version>
-      <!-- Dependencies' versions -->
       <junit-version>4.12</junit-version>
       <hamcrest-version>1.3</hamcrest-version>
       <commons-lang3>3.0</commons-lang3>
       <mockito-version>1.10.19</mockito-version>
       <powermock-version>1.6.6</powermock-version>
+      <!-- Skip integration tests? -->
+      <skip-integration-tests>false</skip-integration-tests>
    </properties>
-     <profiles>
-       <profile>
+   <profiles>
+      <profile>
          <id>default</id>
          <activation>
-           <activeByDefault>true</activeByDefault>
+            <activeByDefault>true</activeByDefault>
          </activation>
          <properties>
-           <skip-integration-tests>false</skip-integration-tests>
-           <skip-end-to-end-tests>true</skip-end-to-end-tests>
+            <skip-integration-tests>true</skip-integration-tests>
+            <skip-end-to-end-tests>true</skip-end-to-end-tests>
          </properties>
-       </profile>
-       <profile>
-         <id>end-to-end-tests</id>
+      </profile>
+      <profile>
+         <id>integration</id>
          <activation>
-           <activeByDefault>false</activeByDefault>
+            <activeByDefault>false</activeByDefault>
          </activation>
          <properties>
-           <skip-integration-tests>false</skip-integration-tests>
-           <skip-end-to-end-tests>false</skip-end-to-end-tests> 
+            <skip-integration-tests>false</skip-integration-tests>
          </properties>
-       </profile>
-     </profiles>
+      </profile>
+      <profile>
+         <id>total</id>
+         <activation>
+            <activeByDefault>false</activeByDefault>
+         </activation>
+         <properties>
+            <skip-integration-tests>false</skip-integration-tests>
+         </properties>
+         <!-- Include slow and end-to-end tests along with integration tests -->
+         <build>
+            <plugins>
+               <plugin>
+                  <artifactId>maven-failsafe-plugin</artifactId>
+                  <version>${maven-failsafe-plugin-version}</version>
+                  <executions>
+                     <execution>
+                        <goals>
+                           <goal>integration-test</goal>
+                           <goal>verify</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+                  <configuration>
+                     <skipTests>${skip-integration-tests}</skipTests>
+                     <includes>
+                        <include>**/integration/*.*</include>
+                        <include>**/it/*.*</include>
+                        <include>%regex[.*IT.*]</include>
+                        <include>%regex[.*IntegrationTest.*]</include>
+                        <include>**/slow/*.*</include>
+                        <include>%regex[.*Slow.*]</include>
+                        <include>**/end-to-end/*.*</include>
+                        <include>**/ete/*.*</include>
+                        <include>%regex[.*ET.*]</include>
+                        <include>%regex[.*EndToEndTest.*]</include>
+                     </includes>
+                  </configuration>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
    <dependencies>
       <dependency>
          <groupId>org.apache.commons</groupId>
@@ -96,9 +136,9 @@
          <version>${commons-lang3}</version>
       </dependency>
       <dependency>
-          <groupId>org.hamcrest</groupId>
-          <artifactId>hamcrest-all</artifactId>
-          <version>${hamcrest-version}</version>
+         <groupId>org.hamcrest</groupId>
+         <artifactId>hamcrest-all</artifactId>
+         <version>${hamcrest-version}</version>
       </dependency>
       <dependency>
          <groupId>junit</groupId>
@@ -127,8 +167,8 @@
          </resource>
       </resources>
       <plugins>
-         <!-- AP Set source compiler level - otherwise, it goes to JRE-1.5 
-            upon Maven/Update Project Configuration -->
+         <!-- Set source compiler level - otherwise, it drops to JRE-1.5 level 
+            upon Maven/Update Project Configuration command in Eclipse -->
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
@@ -146,14 +186,19 @@
                <systemPropertyVariables>
                   <runtime.log>/tmp/log.out</runtime.log>
                </systemPropertyVariables>
-               <!-- Exclude integration tests from Maven build -->
+               <!-- Exclude integration and end-to-end tests from 'validate', 'compile' and 'test' phases/goals - 
+                  they are part of 'integration-test' and 'verify' goals defined later in Failsafe plugin -->
                <configuration>
                   <excludes>
                      <exclude>**/integration/*.*</exclude>
                      <exclude>**/it/*.*</exclude>
+                     <exclude>%regex[.*IT.*]</exclude>
                      <exclude>%regex[.*IntegrationTest.*]</exclude>
+                     <exclude>**/slow/*.*</exclude>
+                     <exclude>%regex[.*Slow.*]</exclude>
                      <exclude>**/end-to-end/*.*</exclude>
                      <exclude>**/ete/*.*</exclude>
+                     <exclude>%regex[.*ET.*]</exclude>
                      <exclude>%regex[.*EndToEndTest.*]</exclude>
                   </excludes>
                </configuration>
@@ -177,10 +222,8 @@
                <includes>
                   <include>**/integration/*.*</include>
                   <include>**/it/*.*</include>
+                  <include>%regex[.*IT.*]</include>
                   <include>%regex[.*IntegrationTest.*]</include>
-                  <include>**/end-to-end/*.*</include>
-                  <include>**/ete/*.*</include>
-                  <include>%regex[.*EndToEndTest.*]</include>
                </includes>
             </configuration>
          </plugin>
@@ -209,8 +252,8 @@
                      <goal>check</goal>
                   </goals>
                   <configuration>
-                     <!-- Do not calculate coverage for the sources of 
-                        test cases themselves. -->
+                     <!-- Do not calculate coverage for the sources of test 
+                        cases themselves. -->
                      <excludes>
                         <exclude>**/*Test.*</exclude>
                         <exclude>**/*test/**/.*</exclude>
@@ -272,7 +315,7 @@
             </configuration>
          </plugin>
          <plugin>
-         <!--  TODO: break on Findbugs error -->
+            <!-- TODO: break build on Findbugs errors! -->
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>findbugs-maven-plugin</artifactId>
             <version>${findbugs-maven-plugin-version}</version>
